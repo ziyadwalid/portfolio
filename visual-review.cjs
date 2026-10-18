@@ -1,0 +1,41 @@
+﻿const { chromium } = require('playwright-core');
+(async()=>{
+ const browser=await chromium.launch({executablePath:'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',headless:true});
+ const errs=[];
+ // Desktop captures
+ let page=await browser.newPage({viewport:{width:1440,height:1000},locale:'en-US'});
+ page.on('console',m=>{if(m.type()==='error')errs.push(m.text())}); page.on('pageerror',e=>errs.push(e.message));
+ await page.goto('http://127.0.0.1:5173/?lang=en',{waitUntil:'networkidle'}); await page.evaluate(()=>document.fonts.ready); await page.waitForTimeout(800);
+ await page.screenshot({path:'.tmp/review/home-top.png'});
+ await page.evaluate(()=>{const el=document.querySelector('#work'); window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 90);}); await page.waitForTimeout(800);
+ await page.screenshot({path:'.tmp/review/work-heading-final.png'});
+ await page.locator('.work-tile').filter({hasText:'UI Motion Study'}).scrollIntoViewIfNeeded(); await page.waitForTimeout(500);
+ await page.locator('.work-tile').filter({hasText:'UI Motion Study'}).locator('.project-media-button__control').click(); await page.waitForTimeout(500);
+ await page.screenshot({path:'.tmp/review/modal-landscape.png'});
+ await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+ await page.goto('http://127.0.0.1:5173/work/creative-editing-study?lang=en',{waitUntil:'networkidle'}); await page.evaluate(()=>document.fonts.ready); await page.waitForTimeout(700);
+ await page.screenshot({path:'.tmp/review/project-creative-desktop.png'});
+ await page.locator('.project-stage').scrollIntoViewIfNeeded(); await page.waitForTimeout(500); await page.screenshot({path:'.tmp/review/project-creative-stage.png'});
+ await page.goto('http://127.0.0.1:5173/cv?lang=ar',{waitUntil:'networkidle'}); await page.evaluate(()=>document.fonts.ready); await page.waitForTimeout(700);
+ await page.screenshot({path:'.tmp/review/cv-ar-top.png'});
+ await page.locator('.cv-sheet').screenshot({path:'.tmp/review/cv-ar-sheet.png'});
+ await page.goto('http://127.0.0.1:5173/?lang=ar',{waitUntil:'networkidle'}); await page.waitForTimeout(500);
+ await page.locator('#contact').scrollIntoViewIfNeeded(); await page.waitForTimeout(600);
+ await page.locator('.contact__direct').screenshot({path:'.tmp/review/contact-ar.png'});
+ await page.locator('.site-footer').scrollIntoViewIfNeeded(); await page.waitForTimeout(400); await page.screenshot({path:'.tmp/review/footer-ar.png'});
+ await page.close();
+ // Mobile captures
+ page=await browser.newPage({viewport:{width:390,height:844},locale:'en-US',isMobile:true,hasTouch:true});
+ page.on('console',m=>{if(m.type()==='error')errs.push(m.text())}); page.on('pageerror',e=>errs.push(e.message));
+ await page.goto('http://127.0.0.1:5173/work/ui-motion-study?lang=en',{waitUntil:'networkidle'}); await page.evaluate(()=>document.fonts.ready); await page.waitForTimeout(600);
+ await page.screenshot({path:'.tmp/review/project-ui-mobile.png'});
+ console.log('ui-mobile-overflow',await page.evaluate(()=>({sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth})));
+ await page.locator('.project-stage').scrollIntoViewIfNeeded(); await page.waitForTimeout(400); await page.screenshot({path:'.tmp/review/project-ui-mobile-stage.png'});
+ await page.goto('http://127.0.0.1:5173/work/creative-editing-study?lang=en',{waitUntil:'networkidle'}); await page.waitForTimeout(500);
+ await page.screenshot({path:'.tmp/review/project-creative-mobile.png'});
+ await page.goto('http://127.0.0.1:5173/?lang=en',{waitUntil:'networkidle'}); await page.waitForTimeout(500);
+ await page.evaluate(()=>{const el=document.querySelector('#work'); window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY);}); await page.waitForTimeout(600);
+ await page.screenshot({path:'.tmp/review/work-mobile.png'});
+ console.log('errors',errs);
+ await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});
