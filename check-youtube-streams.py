@@ -1,0 +1,11 @@
+import json,re
+raw=open('.tmp/youtube-page.html',encoding='utf-8',errors='replace').read()
+idx=raw.find('ytInitialPlayerResponse = ')
+obj,_=json.JSONDecoder().raw_decode(raw[idx+len('ytInitialPlayerResponse = '):])
+sd=obj.get('streamingData',{})
+print('status',obj.get('playabilityStatus',{}).get('status'),obj.get('playabilityStatus',{}).get('reason'))
+print('formats',[(f.get('itag'),f.get('mimeType'),f.get('qualityLabel'),f.get('width'),f.get('height'),bool(f.get('url'))) for f in sd.get('formats',[])])
+print('adaptive count',len(sd.get('adaptiveFormats',[])))
+print('adaptive sample',[(f.get('itag'),f.get('mimeType'),f.get('qualityLabel'),bool(f.get('url'))) for f in sd.get('adaptiveFormats',[])[:12]])
+caps=obj.get('captions',{}).get('playerCaptionsTracklistRenderer',{}).get('captionTracks',[])
+for c in caps: print('caption',c.get('languageCode'),c.get('name'),c.get('baseUrl')[:180])
